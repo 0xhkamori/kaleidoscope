@@ -1,6 +1,6 @@
-# DONT FUCKIN TOUCH OR IT WILL BREAK!!!!
+#------------------------------------------------------------
 from utils import config
-
+#------------------------------------------------------------
 def parse_command(text):
     prefix = config.read_from_config('prefix')
     if text.startswith(prefix):
@@ -9,3 +9,4 @@ def parse_command(text):
         args = command_parts[1:]
         return command, args
     return None, None
+#------------------------------------------------------------
