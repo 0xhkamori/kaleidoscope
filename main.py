@@ -1,63 +1,79 @@
-# Dont touch this file.
+# #    __        __    _    __
+# #   / /_____ _/ /__ (_)__/ /__  ___ _______  ___  ___
+# #  /  '_/ _ `/ / -_) / _  / _ \(_-</ __/ _ \/ _ \/ -_)
+# # /_/\_\\_,_/_/\__/_/\_,_/\___/___/\__/\___/ .__/\__/
+# #                                         /_/
 
-#    __        __    _    __
-#   / /_____ _/ /__ (_)__/ /__  ___ _______  ___  ___
-#  /  '_/ _ `/ / -_) / _  / _ \(_-</ __/ _ \/ _ \/ -_)
-# /_/\_\\_,_/_/\__/_/\_,_/\___/___/\__/\___/ .__/\__/
-#                                         /_/
-
-# ----------------------------------------------------------------------
-import json, os, sys, time, threading
+import json
+import os
+import sys
+import time
+import threading
+from pathlib import Path
 from pyrogram import Client, filters
-from requests import api
 from utils.message_handler import handle_message
-# ----------------------------------------------------------------------
-global_uptime = 0
-stop_toggle = False
-api_id = None
-api_hash = None
-# ----------------------------------------------------------------------
-try:
-    with open('credentials', "rb") as credentials:
-        credentials_data = json.load(credentials)
-except (FileNotFoundError, json.JSONDecodeError):
-    credentials_data = {}
 
-if not credentials_data:
-    print("Get your API ID and API Hash from my.telegram.org")
-    api_id = input("Enter API ID: ")
-    api_hash = input("Enter API hash: ")
-    credentials_data = {'api_id': api_id, 'api_hash': api_hash}
+class KaleidoscopeBot:
+    def __init__(self):
+        self.uptime = 0
+        self.stop_toggle = False
+        self.credentials = self._load_credentials()
+        self.app = Client(
+            "kaleidoscope",
+            api_id=self.credentials['api_id'],
+            api_hash=self.credentials['api_hash']
+        )
+        
+    def _load_credentials(self) -> dict:
+        """Load or create credentials file."""
+        try:
+            with open('credentials', 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return self._create_credentials()
+            
+    def _create_credentials(self) -> dict:
+        """Prompt user for API credentials and save them."""
+        print("Get your API ID and API Hash from my.telegram.org")
+        credentials = {
+            'api_id': input("Enter API ID: "),
+            'api_hash': input("Enter API hash: ")
+        }
+        
+        with open('credentials', 'w') as f:
+            json.dump(credentials, f)
+        return credentials
 
-with open('credentials', "wb") as credentials:
-    credentials.write(json.dumps(credentials_data).encode('utf-8'))
+    def _uptime_counter(self):
+        """Track bot uptime."""
+        while not self.stop_toggle:
+            time.sleep(1)
+            self.uptime += 1
 
-api_id = credentials_data['api_id']
-api_hash = credentials_data['api_hash']
-# ----------------------------------------------------------------------
-def uptime_thread():
-    global global_uptime, stop_toggle
-    while not stop_toggle:
-        time.sleep(1)
-        global_uptime += 1
-# ----------------------------------------------------------------------
-def initialize():
-    os.system('cls')
-    print("\033[95m __           .__         .__    .___                                       ")
-    print("|  | _______  |  |   ____ |__| __| _/____  ______ ____  ____ ______   ____  ")
-    print("|  |/ /\__  \ |  | _/ __ \|  |/ __ |/  _ \/  ___// ___\/  _ \\____ \_/ __ \ ")
-    print("|    <  / __ \|  |_\  ___/|  / /_/ (  <_> )___ \\  \__(  <_> )  |_> >  ___/ ")
-    print("|__|_ \(____  /____/\___  >__\____ |\____/____  >\___  >____/|   __/ \___  >")
-    print("     \/     \/          \/        \/          \/     \/      |__|        \/ \033[92m")
-# ----------------------------------------------------------------------
-initialize()
-app = Client("kaleidoscope", api_id = api_id, api_hash = api_hash)
-uptimethr = threading.Thread(target=uptime_thread, daemon=True)
-uptimethr.start()
-print("\n\n                            🌧 Launch was successful!\033[94m")
-# ----------------------------------------------------------------------
-@app.on_message(filters.text | filters.document)
-async def send_message(client, message):
-    await handle_message(client, message, app)
+    @staticmethod
+    def _display_banner():
+        """Display the ASCII art banner."""
+        os.system('cls' if os.name == 'nt' else 'clear')
+        banner = """
+\033[95m __           .__         .__    .___                                       
+|  | _______  |  |   ____ |__| __| _/____  ______ ____  ____ ______   ____  
+|  |/ /\__  \ |  | _/ __ \|  |/ __ |/  _ \/  ___// ___\/  _ \\____ \_/ __ \ 
+|    <  / __ \|  |_\  ___/|  / /_/ (  <_> )___ \\  \__(  <_> )  |_> >  ___/ 
+|__|_ \(____  /____/\___  >__\____ |\____/____  >\___  >____/|   __/ \___  >
+     \/     \/          \/        \/          \/     \/      |__|        \/ \033[92m
+        """
+        print(banner)
 
-app.run()
+    def start(self):
+        """Initialize and start the bot."""
+        threading.Thread(target=self._uptime_counter, daemon=True).start()
+        self._display_banner()
+        print("\n\n                            🌧 Launch was successful!\033[94m")
+        @self.app.on_message(filters.text, filters.me)
+        async def message_handler(client, message):
+            await handle_message(client, message, self.app)
+        self.app.run()
+
+if __name__ == "__main__":
+    bot = KaleidoscopeBot()
+    bot.start()
