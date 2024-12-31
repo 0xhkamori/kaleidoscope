@@ -1,12 +1,22 @@
 #------------------------------------------------------------
+from typing import Tuple, Optional
 from utils import config
 #------------------------------------------------------------
-def parse_command(text):
+def parse_command(text: str) -> Tuple[Optional[str], list]:
+    """Parse command and arguments from message text.
+    
+    Args:
+        text: The message text to parse
+        
+    Returns:
+        A tuple containing:
+        - The command (str) or None if no valid command
+        - List of command arguments
+    """
     prefix = config.read_from_config('prefix')
-    if text.startswith(prefix):
-        command_parts = text.split(prefix)[1].strip().split()
-        command = command_parts[0]
-        args = command_parts[1:]
-        return command, args
-    return None, None
+    if not text.startswith(prefix):
+        return None, []
+        
+    parts = text[len(prefix):].strip().split()
+    return (parts[0], parts[1:]) if parts else (None, [])
 #------------------------------------------------------------
