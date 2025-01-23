@@ -1,13 +1,6 @@
 
 # 🌧 kaleidoscope
-This is a powerful Telegram userbot built using the Pyrogram framework. Automatization, Management, Fun.
-
-
-## Features
-
-- Message automation: Send and reply to messages automatically.
-- User interaction: React to specific keywords or commands.
-- Custom plugins: Add your own plugins to extend the bot's functionality.
+This is a (not) powerful Telegram userbot built using the Pyrogram framework. Automatization, Management, Fun.
 
 ## Requirements
 Before you can run userbot, ensure that you have the following:
