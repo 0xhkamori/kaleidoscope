@@ -6,7 +6,7 @@ from utils import config
 commands = ["info", "userbot", "about", "kaleidoscope"]
 
 async def handle(app: Client, client: Client, message, args):
-    me = config.read_from_config('mainemoji')
+    me = config.read('mainemoji')
     ram_usage = psutil.virtual_memory().used / (1024 ** 3)
     total_ram = psutil.virtual_memory().total / (1024 ** 3)
     cpu_usage = psutil.cpu_percent()
