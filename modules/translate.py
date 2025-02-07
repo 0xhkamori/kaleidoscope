@@ -8,7 +8,7 @@ translator = Translator()
 async def handle(app: Client, client: Client, message, args):
     phrase = " ".join(args)
     try:
-        translation = translator.translate(phrase, dest=config.read_from_config('trlang'))
+        translation = translator.translate(phrase, dest=config.read('trlang'))
         await app.send_message(message.chat.id,
                                 f"🧾 **Translated:** `{translation.text} ({translation.dest})`")
     except:
