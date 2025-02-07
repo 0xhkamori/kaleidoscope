@@ -1,3 +1,14 @@
+# ░█░█░█░█░█▀█░█▄█░█▀█░█▀▄░▀█▀
+# ░█▀█░█▀▄░█▀█░█░█░█░█░█▀▄░░█░
+# ░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀             
+# Name: modules/help.py
+# Description: Help module
+# Author: hkamori | 0xhkamori.github.io
+# ----------------------------------------------
+# 🔒    Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+# ------------------------------------------------
+
 import os
 import importlib
 from pyrogram import Client
@@ -20,28 +31,13 @@ for module_name, module in modules.items():
             commands_dict[module_name].append(command)
 
 async def handle(app: Client, client: Client, message, args):
-    e = config.read_from_config('help_emoji')
-    me = config.read_from_config('mainemoji')
+    e = config.read('help_emoji')
+    me = config.read('mainemoji')
     commands_count = sum(len(cmds) for cmds in commands_dict.values())
     modules_count = len(commands_dict)  # Count of unique modules
     msgtosend = f"{me} **{commands_count}** Commands available. **{modules_count}** modules.\n\n"
-    # msgtosend = f"{me} **{len(commands_list)}** Commands available\n\n"
-    # for command, module_name in commands_list:
-    #     msgtosend += f"{e} **{module_name.capitalize()}**:  (`{command}`)\n"
-    # msgtosend = (f"{me} **9** Commands available\n\n"
-    #             f"{e} **Ping:**  (`ping` | `pong` | `alive` | `check`)\n"
-    #             f"{e} **Info:**  (`info` | `kaleidoscope` | `userbot` | `about`)\n"
-    #             f"{e} **Help:**  (`help` | `commands`)\n"
-    #             f"{e} **Settings:**  (`settings` | `setvalue`)\n"
-    #             f"{e} **Stop:**  (`stop` | `exit`)\n"
-    #             f"{e} **Restart:**  (`restart` | `reboot`)\n"
-    #             f"{e} **SetPrefix:**  (`setprefix`)\n"
-    #             f"{e} **ExecLine:**  (`exec`)\n"
-    #             f"{e} **Translate:**  (`tr`)\n"
-    #             f"{e} **ILoveYou:**  (`ily`)\n"
-    #             f"{e} **Weather:**  (`weather`)")
 
     for module_name, commands in commands_dict.items():
-            commands_str = " | ".join(commands)  # Join commands with a pipe separator
+            commands_str = " | ".join(commands)
             msgtosend += f"{e} **{module_name.capitalize()}**:  ({commands_str})\n"
     await app.send_message(message.chat.id, msgtosend)
