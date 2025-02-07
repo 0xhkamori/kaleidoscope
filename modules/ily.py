@@ -1,3 +1,14 @@
+# ░█░█░█░█░█▀█░█▄█░█▀█░█▀▄░▀█▀
+# ░█▀█░█▀▄░█▀█░█░█░█░█░█▀▄░░█░
+# ░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀             
+# Name: modules/ily.py
+# Description: ILY module
+# Author: hkamori | 0xhkamori.github.io
+# ----------------------------------------------
+# 🔒    Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+# ------------------------------------------------
+
 import asyncio
 from asyncio.tasks import sleep
 import requests
@@ -18,4 +29,4 @@ async def handle(app: Client, client: Client, message, args):
     await asyncio.sleep(0.5)
     for frame in hearts_animation:
         await app.edit_message_text(chat_id=msg.chat.id, message_id=msg.id, text=frame)
-        await asyncio.sleep(0.5)  # Adjust the speed of the animation as needed
+        await asyncio.sleep(0.5)
