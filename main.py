@@ -1,10 +1,14 @@
-# #    __        __    _    __
-# #   / /_____ _/ /__ (_)__/ /__  ___ _______  ___  ___
-# #  /  '_/ _ `/ / -_) / _  / _ \(_-</ __/ _ \/ _ \/ -_)
-# # /_/\_\\_,_/_/\__/_/\_,_/\___/___/\__/\___/ .__/\__/
-# #                                         /_/
+# ░█░█░█░█░█▀█░█▄█░█▀█░█▀▄░▀█▀
+# ░█▀█░█▀▄░█▀█░█░█░█░█░█▀▄░░█░
+# ░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀             
+# Name: main.py
+# Description: Telegram userbot built using the Pyrogram framework. 
+# Author: hkamori | 0xhkamori.github.io
+# ----------------------------------------------
+# 🔒    Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+# ------------------------------------------------
 
-#-------------------------------------------------
 import json
 import os
 import sys
@@ -12,8 +16,8 @@ import time
 import threading
 from pathlib import Path
 from pyrogram import Client, filters
-from utils.message_handler import handle_message
-#-------------------------------------------------
+from utils.message_handler import message_handler
+
 class KaleidoscopeBot:
     def __init__(self):
         self.uptime = 0
@@ -69,13 +73,11 @@ class KaleidoscopeBot:
         """Initialize and start the bot."""
         threading.Thread(target=self._uptime_counter, daemon=True).start()
         self._display_banner()
-        print("\n\n                            🌧 Launch was successful!\033[94m")
-        @self.app.on_message(filters.text & filters.me)
-        async def message_handler(client, message):
-            await handle_message(client, message, self.app)
+        @self.app.on_message()
+        async def message_handler_wrapper(client, message):
+            await message_handler.handle_message(client, message, self.app)
         self.app.run()
-#-------------------------------------------------
+
 if __name__ == "__main__":
     bot = KaleidoscopeBot()
     bot.start()
-#-------------------------------------------------
