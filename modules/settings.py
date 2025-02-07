@@ -5,15 +5,15 @@ commands = ["settings", "config"]
 
 async def handle(app: Client, client: Client, message, args):
     msg = "⚠  **Configuration**\n\n"
-    p = config.read_from_config('prefix')
-    cfgkeys = config.read_all_keys()
+    p = config.read('prefix')
+    cfgkeys = config.readAll()
     def transform_dict_to_list():
         """
         Transforms the dictionary of config into a list of [key, value] pairs.
 
         :return: A list of lists, where each inner list contains a key and its corresponding value
         """
-        config_dict = config.read_all_keys()
+        config_dict = config.readAll()
         return [[key, value] for key, value in config_dict.items()]
     config_list = transform_dict_to_list()
 
