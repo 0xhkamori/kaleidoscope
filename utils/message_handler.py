@@ -1,17 +1,29 @@
-#-------------------------------------------------
-import os
-import importlib
-import subprocess
+# ░█░█░█░█░█▀█░█▄█░█▀█░█▀▄░▀█▀
+# ░█▀█░█▀▄░█▀█░█░█░█░█░█▀▄░░█░
+# ░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀             
+# Name: utils/message_handler.py
+# Description: Handle incoming messages and dispatch them to the appropriate modules.
+# Author: hkamori | 0xhkamori.github.io
+# ----------------------------------------------
+# 🔒    Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+# ------------------------------------------------
+
 from typing import Tuple, Optional, Dict, Any
 from pathlib import Path
+import importlib
+import subprocess
 from pyrogram import Client
 from pyrogram.types import Message
-from utils import config
-#-------------------------------------------------
-class ModuleLoader:
+from utils.config import config, add
+
+class MessageHandler:
     def __init__(self, modules_dir: str = "modules"):
         self.modules_dir = Path(modules_dir)
         self.modules: Dict[str, Any] = {}
+        self.prefix = config.get('prefix', '.')
+        if not config.get('allowed_users'):
+            add('allowed_users', [])
         self.load_modules()
 
     def load_modules(self) -> None:
@@ -24,67 +36,49 @@ class ModuleLoader:
             name: importlib.import_module(f"modules.{name}")
             for name in module_files
         }
-#-------------------------------------------------
-class CommandParser:
-    def __init__(self):
-        self.prefix = config.read_from_config('prefix')
 
-    def parse(self, text: str) -> Tuple[Optional[str], list]:
+    def parse_command(self, text: str) -> Tuple[Optional[str], list]:
         """Parse command and arguments from message text."""
-        if not text.startswith(self.prefix):
+        if not text or not text.startswith(self.prefix):
             return None, []
         
         parts = text[len(self.prefix):].strip().split()
         return (parts[0], parts[1:]) if parts else (None, [])
-#-------------------------------------------------
-async def load_external_module(app: Client, message: Message) -> None:
-    """Load an external module from a document."""
-    try:
-        downloads_dir = Path("downloads")
-        downloads_dir.mkdir(exist_ok=True)
+
+    async def validate_user(self, message: Message, client: Client) -> bool:
+        """
+        Validate if the message sender is authorized to use commands.
+        Returns True if user is the bot owner or in allowed_users list.
+        """
+        if not message.from_user:
+            return False
+
+        me = await client.get_me()
         
-        file = await message.download()
-        module_name = Path(message.document.file_name).stem
-        
-        importlib.import_module(f'downloads.{module_name}')
-        
-        subprocess.run(f'rm downloads/{message.document.file_name}', shell=True)
-        target_path = Path("modules") / message.document.file_name
-        await message.download(file_name=str(target_path))
-        
-        await app.send_message(
-            message.chat.id,
-            "✅  Module **loaded** successfully, restart your userbot.\n\n"
-            "⚠  **Note:** If your module does not answer to messages, "
-            "this means that your module is not implemented according to the instructions"
-        )
-    except Exception as error:
-        await app.send_message(
-            message.chat.id,
-            f"📛  **Error loading module**: {str(error)}"
-        )
-#-------------------------------------------------
-async def handle_message(client: Client, message: Message, app: Client) -> None:
-    """Handle incoming messages and route them to appropriate handlers."""
-    if message.document and message.caption:
-        if message.caption.lower() in (".lm", ".loadmodule"):
-            await load_external_module(app, message)
+        if message.from_user.id == me.id:
+            return True
+            
+        allowed_users = config.get('allowed_users', [])
+        return message.from_user.id in allowed_users
+
+    async def handle_message(self, client: Client, message: Message, app: Client) -> None:
+        """Handle incoming messages with user validation."""
+        if not await self.validate_user(message, client):
             return
 
-    if not message.text:
-        return
+        if not message.text:
+            return
 
-    parser = CommandParser()
-    command, args = parser.parse(message.text)
-    
-    if not command:
-        return
+        command, args = self.parse_command(message.text)
+        
+        if not command:
+            return
 
-    await app.delete_messages(message.chat.id, message.id)
+        await app.delete_messages(message.chat.id, message.id)
 
-    module_loader = ModuleLoader()
-    for module in module_loader.modules.values():
-        if hasattr(module, 'commands') and command in module.commands:
-            await module.handle(app, client, message, args)
-            break
-#-------------------------------------------------
+        for module in self.modules.values():
+            if hasattr(module, 'commands') and command in module.commands:
+                await module.handle(app, client, message, args)
+                break
+
+message_handler = MessageHandler()
