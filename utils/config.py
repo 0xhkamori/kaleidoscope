@@ -1,8 +1,18 @@
-#------------------------------------------------------------
+# ░█░█░█░█░█▀█░█▄█░█▀█░█▀▄░▀█▀
+# ░█▀█░█▀▄░█▀█░█░█░█░█░█▀▄░░█░
+# ░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀             
+# Name: utils/config.py
+# Description: Config system 
+# Author: hkamori | 0xhkamori.github.io
+# ----------------------------------------------
+# 🔒    Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+# ------------------------------------------------
+
 import os
 import json
 from typing import Any, Dict, Optional
-#------------------------------------------------------------
+
 class ConfigManager:
     """Manages configuration operations with file caching."""
     
@@ -69,18 +79,17 @@ class ConfigManager:
             self._save_config(self._config_cache)
             return True
         return False
-#------------------------------------------------------------
+
 config = ConfigManager()
-#------------------------------------------------------------
-def add_to_config(key: str, value: Any) -> None:
+
+def add(key: str, value: Any) -> None:
     config.add_or_update(key, value)
 
-def read_from_config(key: str) -> Any:
+def read(key: str) -> Any:
     return config.get(key)
 
-def read_all_keys() -> Dict[str, Any]:
+def readAll() -> Dict[str, Any]:
     return config.get_all()
 
-def remove_from_config(key: str) -> bool:
+def remove(key: str) -> bool:
     return config.remove(key)
-#------------------------------------------------------------
